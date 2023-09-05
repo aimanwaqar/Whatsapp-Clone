@@ -1,8 +1,9 @@
-import {useContext,useState} from 'react'
+import {useContext,useState,useEffect} from 'react'
 import {Box,styled} from "@mui/material"
 import Footer from "./Footer"
+import Message from './Message'
 import { AccountContext } from '../../../context/AccountProvider'
-import { newMessage } from '../../../service/api'
+import { getMessages, newMessage } from '../../../service/api'
 
  
 const Wrapper =styled(Box)`
@@ -13,11 +14,25 @@ const Component = styled(Box)`
    height: 83vh;
    overflow-y: scroll;
 `
+const Container = styled(Box)`
+  padding: 1px 80px;
+`
 
 const Messages = ({ person, conversation })=>{
 
    const [value, setValue] = useState([]);
    const {account} = useContext(AccountContext);
+
+   const [messages, setMessages] = useState([]);
+   const [newMessageFlag,setNewMessageFlag] = useState(false);
+
+   useEffect(()=>{
+      const getMessageDetails = async()=>{
+         let data = await getMessages(conversation._id);
+         setMessages(data);
+      }
+      conversation._id && getMessageDetails();
+   }, [person.sub,conversation._id,newMessageFlag]);
 
     const sendText = async(e) =>{
        const code = e.keyCode || e.which;
@@ -34,13 +49,21 @@ const Messages = ({ person, conversation })=>{
         await newMessage(message);
 
         setValue('');
+        setNewMessageFlag(prev => !prev);
        }
     }
     return (
         <>
           <Wrapper>
              <Component>
-                 
+                {
+                  messages && messages.map(message => (
+                     <Container>
+                        <Message message={message}/>
+                     </Container>
+                      
+                  ))
+                }
              </Component>
             <Footer sendText={sendText} setValue={setValue} value={value}/>
           </Wrapper>

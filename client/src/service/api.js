@@ -50,3 +50,14 @@ export const newMessage = async(data)=>{
   }
 
 }
+
+export const getMessages = async(id)=>{
+  try{
+     let response = await axios.get(`${url}/message/get/${id}`);
+     console.log(response);
+     return response.data;
+  }catch(error){
+   console.log("Error while calling getMessage API", error.message);
+  }
+
+}
